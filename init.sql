@@ -1,0 +1,56 @@
+CREATE DATABASE IF NOT EXISTS bookstore;
+
+USE bookstore;
+
+DROP TABLE IF EXISTS book_stocks;
+DROP TABLE IF EXISTS books;
+DROP TABLE IF EXISTS authors;
+DROP TABLE IF EXISTS user_tokens;
+DROP TABLE IF EXISTS users;
+
+
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    user_type ENUM('admin','vendor', 'user') NOT NULL DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS user_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS authors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    bio TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS books (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    author_id INT NOT NULL,
+    published_date DATE,
+    genre VARCHAR(50),
+    description TEXT,
+    cover_image VARCHAR(1024),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS book_stocks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
+);
+

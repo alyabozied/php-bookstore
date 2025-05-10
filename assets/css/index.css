@@ -1,0 +1,63 @@
+/* Base CSS for Home Page */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+nav {
+    background: #444;
+    color: #fff;
+    padding: 0.5rem 0;
+    text-align: center;
+    padding: 30px;
+}
+nav .right {
+    float: right;
+    margin-right: 20px;
+}
+nav .left {
+    float: left;
+    margin-left: 20px;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 1rem;
+    font-size: 1rem;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 2rem;
+    background: #fff;
+    margin: 1rem auto;
+    max-width: 1200px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+main h1 {
+    text-align: center;
+}
+footer {
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
