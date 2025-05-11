@@ -1,0 +1,70 @@
+.carousel {
+    max-width: 960px;
+    position: relative;
+}
+.carousel .slider {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: row;
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* Internet Explorer and Edge */
+    overflow: hidden;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.carousel .slider::-webkit-scrollbar {
+    display: none;
+}
+.right-button {
+    right: -40px;
+}
+.left-button {
+    left: -40px;
+}
+.scrolling-buttons{
+    position: absolute;
+    align-self: center;
+    top:45%;
+    background-color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    border-radius: 50%;
+}
+.scrolling-buttons:hover{
+    background-color: #ddd;
+}
+.carousel-card img {
+    margin-top:5px;
+    width: auto;
+    max-width: 80%;
+    height: 150px;  
+    margin-bottom: 5px;  
+    display: block;  
+    margin-left: auto;  
+    margin-right: auto;  
+}
+
+.carousel-card{
+    width: 300px;
+    flex :0 0 auto;
+    height: 400px;
+    margin: 10px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-card .description {  
+ font-size: 16px;  
+ text-overflow: ellipsis;  
+ overflow: hidden;
+ height: 60px;  
+ line-height:20px;
+}

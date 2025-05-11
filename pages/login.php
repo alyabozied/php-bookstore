@@ -1,3 +1,7 @@
+<?php
+$title = "Login";
+ob_start(); 
+?>
 <?php 
 include "logic/auth.php";
 if (checkLoginStatus()) {
@@ -7,6 +11,7 @@ if (checkLoginStatus()) {
 ?>
 
 <?php
+$out = ['status' => false, 'message' => ''];
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST["username"];
     $password = $_POST["password"];
@@ -14,16 +19,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($out['status']) {
         header("Location: " . $_SERVER['PHP_SELF'] . "?page=home");
         exit;
-    } else {
-        echo "<p style='color:red;'>". $out['message']."</p>";
-    }   
+    }
 }
 ?>
-<?php
-$title = "Login";
-ob_start(); 
-?>
 <form method="POST" action="">
+    <p style='color:red;'><?= $out['message'] ?></p>
     Username: <input type="text" name="username" required><br><br>
     Password: <input type="password" name="password" required><br><br>
     <button type="submit">Login</button>

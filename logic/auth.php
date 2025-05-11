@@ -38,7 +38,7 @@ function logout() {
 
 function login($username, $password) {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-    $stmt = $conn->prepare("SELECT id , password FROM users WHERE username=?");
+    $stmt = $conn->prepare("SELECT id , password ,user_type FROM users WHERE username=?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $stmt->store_result();
@@ -46,7 +46,7 @@ function login($username, $password) {
         $stmt->close();
         return ['status'=>false , 'message'=>"User not found."];
     }
-    $stmt->bind_result($user_id, $hashed_password);
+    $stmt->bind_result($user_id, $hashed_password,$user_type);
     $stmt->fetch();
     $stmt->close();
     if(!password_verify($password, $hashed_password)){
@@ -54,7 +54,7 @@ function login($username, $password) {
     }
     $_SESSION["user"] = $username;
     $_SESSION["token"] = createToken($user_id); 
-    
+    $_SESSION["user_type"] = $user_type; 
     return ['status'=>true , 'message'=>"Login successful."];    
 }
 
@@ -65,12 +65,13 @@ function register($username, $password) {
         return ['status'=>false , 'message'=>"Username already taken."];
     }
     $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
-    $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+    $stmt = $conn->prepare("INSERT INTO users (username, password,user_type) VALUES (?, ? , 'user')");
     $stmt->bind_param("ss", $username, $hashed_password);
     if ($stmt->execute()) {
         $user_id = $conn->insert_id; // Get the last inserted user ID
         $_SESSION["user"] = $username;
         $_SESSION["token"] = createToken($user_id);
+        $_SESSION["user_type"] = 'user';
         return ['status'=>true , 'message'=>"Registered successfully."];
     }   
     
@@ -96,4 +97,14 @@ function createToken($user_id) {
     
     return null;
     
+}
+function getUserType($username) {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    $stmt = $conn->prepare("SELECT user_type FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $stmt->bind_result($user_type);
+    $stmt->fetch();
+    $stmt->close();
+    return $user_type;
 }

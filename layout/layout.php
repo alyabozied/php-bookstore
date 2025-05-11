@@ -11,9 +11,18 @@
         <nav>
             <div class="left">
                 <a href="index.php?page=home">Home</a> |
-                <a href="index.php?page=about">About</a>
+                <a href="index.php?page=about">About</a> |
+                <a href="index.php?page=book/showgenres">Genres</a>
             </div>
+
             <div class="right">
+                
+                <form action="index.php" method="get" style="display:inline;">
+                    <input type="hidden" name="page" value="book/search">
+                    <input type="text" name="q" placeholder="Search books..." required>
+                    <button type="submit">Search</button>
+                </form>
+
                 <?php if (isset($_SESSION['user'])): ?>
                  <a href="index.php?page=logout">Logout</a>
                 <?php else: ?>      

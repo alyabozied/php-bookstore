@@ -2,10 +2,21 @@
 $title = "New Book";
 include_once "logic/book.php";
 include_once "logic/author.php";
+include_once "logic/auth.php";
 ob_start();
+$authors = getAllAuthors();
 ?>
 
 <?php
+if (!checkLoginStatus()){
+    header("Location: " . $_SERVER['PHP_SELF'] . "?page=login");
+    exit;
+}
+if(getUserType($_SESSION['user']) != 'admin' && getUserType($_SESSION['user']) != 'vendor'){
+    header("Location: " . $_SERVER['PHP_SELF'] . "?page=home");
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'] ?? '';
     $authorId = $_POST['author'] ?? '';
@@ -14,9 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = $_POST['description'] ?? '';
     $coverImageUrl = $_POST['coverImageUrl'] ?? '';
 
-    if (!empty($title) && !empty($author) && !empty($genre) && !empty($publishedDate) && !empty($description) && !empty($coverImageUrl)) {
-        addBook($title, $authorId,$publishedDate, $genre,$description ,$coverImageUrl);
-        echo "<p>Book added successfully!</p>";
+    if (!empty($title) && !empty($authorId) && !empty($genre) && !empty($publishedDate) && !empty($description) && !empty($coverImageUrl)) {
+        $id = addBook($title, $authorId,$publishedDate, $genre,$description ,$coverImageUrl);
+        header("Location: " . $_SERVER['PHP_SELF'] . "?page=book/show&id=$id");
+        exit;
     } else {
         echo "<p>All fields are required.</p>";
     }
@@ -24,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
  <div class="container mx-auto p-8">
         <h1 class="text-3xl font-semibold text-blue-600 text-center mb-6">Add New Book</h1>
-        <form id="addBookForm" class="bg-white shadow-md rounded-lg p-8">
+        <form method="POST" action="" id="addBookForm" class="bg-white shadow-md rounded-lg p-8">
             <div class="mb-4">
                 <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Title:</label>
                 <input type="text" id="title" name="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
@@ -34,6 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="author" class="block text-gray-700 text-sm font-bold mb-2">Author:</label>
                 <select id="author" name="author" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
                     <option value="" disabled selected>Select an author</option>
+                    <?php foreach ($authors as $author): ?>
+                        <option value="<?php echo htmlspecialchars($author['id']); ?>">
+                            <?php echo htmlspecialchars($author['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </div>
 

@@ -46,10 +46,11 @@ function addBook($title, $authorId, $publishedDate, $genre, $description,$coverI
             VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sissss", $title, $authorId, $publishedDate, $genre, $description,$coverImageUrl);
-    $result = $stmt->execute();
+    $stmt->execute();
+    $id = $stmt->insert_id;
     $stmt->close();
     $conn->close();
-    return $result;
+    return $id;
 }
 ?>
 <?php   
@@ -77,14 +78,16 @@ function deleteBook($bookId) {
     return $result;
 }?>
 <?php 
-function searchBooks($searchTerm) {
+function searchBooks($searchTerm, $page = 1, $pageSize = 10) {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    $offset = ($page - 1) * $pageSize;
     $sql = "SELECT books.*, authors.name AS author_name FROM books 
             JOIN authors ON books.author_id = authors.id 
-            WHERE books.title LIKE ? OR authors.name LIKE ?";
+            WHERE books.title LIKE ? OR authors.name LIKE ?
+            LIMIT ? OFFSET ?";
     $stmt = $conn->prepare($sql);
-    $searchTerm = "%$searchTerm%";
-    $stmt->bind_param("ss", $searchTerm, $searchTerm);
+    $searchTermLike = "%$searchTerm%";
+    $stmt->bind_param("ssii", $searchTermLike, $searchTermLike, $pageSize, $offset);
     $stmt->execute();
     $result = $stmt->get_result();
     $books = [];
@@ -95,7 +98,26 @@ function searchBooks($searchTerm) {
         }
     }
 
-    return $books;
+    // Optionally, get total count for pagination
+    $countSql = "SELECT COUNT(*) as total FROM books 
+                 JOIN authors ON books.author_id = authors.id 
+                 WHERE books.title LIKE ? OR authors.name LIKE ?";
+    $countStmt = $conn->prepare($countSql);
+    $countStmt->bind_param("ss", $searchTermLike, $searchTermLike);
+    $countStmt->execute();
+    $countResult = $countStmt->get_result();
+    $total = $countResult->fetch_assoc()['total'];
+    $countStmt->close();
+
+    $stmt->close();
+    $conn->close();
+
+    return [
+        'books' => $books,
+        'total' => $total,
+        'page' => $page,
+        'pageSize' => $pageSize
+    ];
 }
 ?>
 
@@ -137,5 +159,36 @@ function getBooksByGenre($genre) {
     $conn->close();
     $result->close();
     return $books;
+}
+?>
+
+
+<?php
+function getBooksGroupedByGenre() {
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    $sql = "SELECT books.*, authors.name AS author_name, books.genre 
+            FROM books 
+            JOIN authors ON books.author_id = authors.id";
+    $result = $conn->query($sql);
+    $groupedBooks = [];
+
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $genre = $row['genre'];
+            if (!isset($groupedBooks[$genre])) {
+                $groupedBooks[$genre] = [];
+            }
+            $groupedBooks[$genre][] = $row;
+        }
+    }
+    $conn->close();
+    $result->close();
+
+    // Sort genres by number of books (descending)
+    uasort($groupedBooks, function($a, $b) {
+        return count($b) - count($a);
+    });
+
+    return $groupedBooks;
 }
 ?>

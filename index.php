@@ -4,7 +4,6 @@ if ($page === ''){
     $file = "home.php";
 }
 $file = "pages/$page";
-
 if (file_exists($file .".php")) {
     include $file.".php";
 } else if(file_exists($file."/index.php")) {
