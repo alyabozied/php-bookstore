@@ -84,6 +84,7 @@ function searchBooks($searchTerm, $page = 1, $pageSize = 10) {
     $sql = "SELECT books.*, authors.name AS author_name FROM books 
             JOIN authors ON books.author_id = authors.id 
             WHERE books.title LIKE ? OR authors.name LIKE ?
+            ORDER BY average_rating DESC, review_count DESC
             LIMIT ? OFFSET ?";
     $stmt = $conn->prepare($sql);
     $searchTermLike = "%$searchTerm%";
@@ -139,13 +140,15 @@ function getAllGenres() {
 }
 ?>
 <?php
-function getBooksByGenre($genre) {
+function getBooksByGenre($genre, $page = 1, $pageSize = 10) {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    $offset = ($page - 1) * $pageSize;
     $sql = "SELECT books.*, authors.name AS author_name FROM books 
             JOIN authors ON books.author_id = authors.id 
-            WHERE books.genre = ?";
+            WHERE books.genre = ?
+            LIMIT ? OFFSET ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $genre);
+    $stmt->bind_param("sii", $genre, $pageSize, $offset);
     $stmt->execute();
     $result = $stmt->get_result();
     $books = [];
@@ -155,10 +158,28 @@ function getBooksByGenre($genre) {
             $books[] = $row;
         }
     }
+
+    // Get total count for pagination
+    $countSql = "SELECT COUNT(*) as total FROM books 
+                 JOIN authors ON books.author_id = authors.id 
+                 WHERE books.genre = ?";
+    $countStmt = $conn->prepare($countSql);
+    $countStmt->bind_param("s", $genre);
+    $countStmt->execute();
+    $countResult = $countStmt->get_result();
+    $total = $countResult->fetch_assoc()['total'];
+    $countStmt->close();
+
     $stmt->close();
     $conn->close();
     $result->close();
-    return $books;
+
+    return [
+        'books' => $books,
+        'total' => $total,
+        'page' => $page,
+        'pageSize' => $pageSize
+    ];
 }
 ?>
 
@@ -168,7 +189,8 @@ function getBooksGroupedByGenre() {
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     $sql = "SELECT books.*, authors.name AS author_name, books.genre 
             FROM books 
-            JOIN authors ON books.author_id = authors.id";
+            JOIN authors ON books.author_id = authors.id
+            ORDER BY average_rating DESC, review_count DESC";
     $result = $conn->query($sql);
     $groupedBooks = [];
 

@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-<form method="POST" action="">
+<form class="post-form" method="POST" action="">
     <p style='color:red;'><?= $out['message'] ?></p>
     Username: <input type="text" name="username" required><br><br>
     Password: <input type="password" name="password" required><br><br>

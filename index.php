@@ -1,5 +1,5 @@
 <?php
-$page = $_GET['page'] ?? 'home';
+$page = $_REQUEST['page'] ?? 'home';
 if ($page === ''){
     $file = "home.php";
 }
